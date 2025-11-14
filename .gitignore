@@ -1,0 +1,58 @@
+# Byte-compiled / optimized / compiled files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Virtual environment
+.venv/
+env/
+venv/
+*.egg-info/
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+pip-selfcheck.json
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.bak
+*.orig
+*.rej
+*~
+.#*
+
+# OS generated files
+.DS_Store
+.Trashes
+Thumbs.db
+
+# Environment variables and sensitive data
+.env
+*.env
+secrets.toml
+config.ini
+config.json
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.nox/
+
+# Logs
+*.log
+logs/
+
+# Database files (if not managed by migrations)
+*.sqlite3
+*.db
