@@ -1,65 +1,170 @@
-# ==================== SETUP INSTRUCTIONS ====================
+---
+# 🚀 Project Setup & Installation Guide
 
-SETUP INSTRUCTIONS:
+This guide will help you set up and run the application locally with PostgreSQL and FastAPI.
+---
 
-1. Install PostgreSQL:
+## 📦 Prerequisites
 
-   - Windows: Download from https://www.postgresql.org/download/windows/
-   - Mac: brew install postgresql
-   - Linux: sudo apt-get install postgresql postgresql-contrib
+- **Python 3.8+**
+- **PostgreSQL 12+**
+- **pip & virtualenv**
 
-2. Start PostgreSQL service:
+---
 
-   - Windows: Use Services or pg_ctl
-   - Mac: brew services start postgresql
-   - Linux: sudo service postgresql start
+## 🗄️ 1. Install PostgreSQL
 
-3. Run the database script:
-   psql -U postgres -f db_script.sql
+### **Windows**
 
-4. Create virtual environment:
-   python -m venv venv
-   source venv/bin/activate # On Windows: venv\Scripts\activate
+Download the installer:
+[https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
 
-5. Install dependencies:
-   pip install -r requirements.txt
+### **Mac**
 
-6. Copy .env.example to .env and update values:
-   cp .env.example .env
+```sh
+brew install postgresql
+```
 
-7. Update .env file with your actual values:
+### **Linux**
 
-   - DATABASE_URL (PostgreSQL connection string)
-   - SECRET_KEY (generate a secure random string)
-   - SMTP credentials (for email functionality)
+```sh
+sudo apt-get install postgresql postgresql-contrib
+```
 
-8. Run the application:
-   python main.py
+---
 
-   Or with uvicorn:
-   uvicorn main:app --reload
+## ▶️ 2. Start PostgreSQL Service
 
-9. Access the API:
+### **Windows**
 
-   - API: http://localhost:8000
-   - Docs: http://localhost:8000/docs
-   - ReDoc: http://localhost:8000/redoc
+Use **Services** or:
 
-10. Test the endpoints:
-    - POST /api/auth/register - Register new user
-    - POST /api/auth/login - Login user
-    - POST /api/auth/verify-otp - Verify email with OTP
-    - POST /api/auth/forgot-password - Request password reset
-    - POST /api/auth/reset-password - Reset password with OTP
-    - GET /api/auth/me - Get current user info (requires auth)
-    - GET /api/auth/admin/users - Get all users (admin only)
+```sh
+pg_ctl start
+```
 
-API AUTHENTICATION:
-Use Bearer token in Authorization header:
-Authorization: Bearer <your_access_token>
+### **Mac**
 
-DATABASE CONNECTION STRING FORMAT:
+```sh
+brew services start postgresql
+```
+
+### **Linux**
+
+```sh
+sudo service postgresql start
+```
+
+---
+
+## 🗃️ 3. Run the Database Script
+
+```sh
+psql -U postgres -f db_script.sql
+```
+
+---
+
+## 🐍 4. Create Virtual Environment
+
+```sh
+python -m venv venv
+```
+
+Activate:
+
+### **Mac/Linux**
+
+```sh
+source venv/bin/activate
+```
+
+### **Windows**
+
+```sh
+venv\Scripts\activate
+```
+
+---
+
+## 📥 5. Install Dependencies
+
+```sh
+pip install -r requirements.txt
+```
+
+---
+
+## 🔐 6. Configure Environment Variables
+
+Copy example file:
+
+```sh
+cp .env.example .env
+```
+
+Update the following values in **.env**:
+
+- `DATABASE_URL` → PostgreSQL connection string
+- `SECRET_KEY` → Strong random key
+- `SMTP_*` → Email credentials
+
+**PostgreSQL connection string format:**
+
+```
 postgresql://username:password@host:port/database_name
+```
 
 Example:
-postgresql://postgres:mypassword@localhost:5432/auth_db
+
+```
+postgresql://postgres:mypassword@localhost:5432/resume_ai_db
+```
+
+---
+
+## 🚀 7. Run the Application
+
+### Option 1 — Normal run
+
+```sh
+python main.py
+```
+
+### Option 2 — With Uvicorn (recommended)
+
+```sh
+uvicorn main:app --reload
+```
+
+---
+
+## 🌐 8. Access API
+
+- API Base URL → [http://localhost:8000](http://localhost:8000)
+- Swagger Docs → [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc → [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+---
+
+## 🧪 9. Test Authentication Endpoints
+
+| Endpoint                    | Method | Description                      |
+| --------------------------- | ------ | -------------------------------- |
+| `/api/auth/register`        | POST   | Register new user                |
+| `/api/auth/login`           | POST   | Login user                       |
+| `/api/auth/verify-otp`      | POST   | Verify email OTP                 |
+| `/api/auth/forgot-password` | POST   | Request password reset           |
+| `/api/auth/reset-password`  | POST   | Reset password using OTP         |
+| `/api/auth/me`              | GET    | Get current user (requires auth) |
+| `/api/auth/admin/users`     | GET    | List all users (admin only)      |
+
+---
+
+## 🔑 Authentication
+
+Use Bearer token in request header:
+
+```
+Authorization: Bearer <your_access_token>
+```
