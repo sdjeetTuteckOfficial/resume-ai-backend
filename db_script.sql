@@ -75,3 +75,24 @@ WHERE table_schema = 'public';
 
 -- Check otps table structure
 \d otps
+
+
+CREATE TABLE t_job_details (
+    -- Primary Key: Auto-generated, sequential integer
+    id SERIAL PRIMARY KEY,
+
+    -- Admin-provided unique job identifier (VARCHAR(50) and unique index)
+    job_id VARCHAR(50) NOT NULL UNIQUE,
+
+    -- Human-readable job name (VARCHAR(255))
+    job_name VARCHAR(255) NOT NULL,
+
+    -- Detailed description of the job (TEXT, equivalent to SQLAlchemy's String for long content)
+    job_details TEXT NOT NULL,
+
+    -- Timestamp for when the record was created
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Timestamp for when the record was last updated
+    updated_at TIMESTAMP WITH TIME ZONE
+);
