@@ -8,7 +8,7 @@ from routers.job_router import router as job_router
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="FastAPI Auth System with PostgreSQL")
+app = FastAPI(title="FastAPI backend API documentation for ResumeAI")
 
 # CORS middleware
 app.add_middleware(
