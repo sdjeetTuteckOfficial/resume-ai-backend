@@ -1,17 +1,14 @@
-from fastapi import APIRouter, status, Depends, Response
-from sqlalchemy.orm import Session
+# job_router.py
+from fastapi import APIRouter, status, Response
 from typing import List
-from models.job_model import TJobDetails
 from schemas.job_schema import JobCreate, JobRead
 from services.job_service import JobService
-from utils.dependencies import AdminUser, DBSession # Import our new dependency
+# Import the new CurrentUser dependency
+from utils.dependencies import AdminUser, DBSession, CurrentUser 
 
-# Create a router instance
 router = APIRouter()
 
-# NOTE: The dependency AdminUser ensures only authenticated admins can access these endpoints.
-# The actual current_user object is not used in the JobService, but it enforces the permission check.
-
+# --- ADMIN ONLY (Keep AdminUser) ---
 @router.post(
     "/",
     response_model=JobRead,
@@ -19,52 +16,45 @@ router = APIRouter()
     summary="Create a new job detail entry (Admin required)"
 )
 def create_new_job(job: JobCreate, db: DBSession, admin_user: AdminUser):
-    """
-    Create a new job detail entry. Requires valid Admin authentication token.
-    """
     return JobService.create_job(db, job)
 
+# --- OPEN TO ALL USERS (Switch to CurrentUser) ---
 @router.get(
     "/",
     response_model=List[JobRead],
-    summary="List all job detail entries (Admin required)"
+    summary="List all job detail entries (Authenticated Users)"
 )
-def read_all_jobs(db: DBSession, admin_user: AdminUser, skip: int = 0, limit: int = 100):
+def read_all_jobs(db: DBSession, current_user: CurrentUser, skip: int = 0, limit: int = 100):
     """
-    Retrieve a list of all job detail entries, paginated. Requires valid Admin authentication token.
+    Accessible by both Admins and Users.
     """
     return JobService.get_jobs(db, skip=skip, limit=limit)
 
 @router.get(
     "/{job_id}",
     response_model=JobRead,
-    summary="Get a specific job detail entry by job_id (Admin required)"
+    summary="Get a specific job detail entry (Authenticated Users)"
 )
-def read_job_by_id(job_id: str, db: DBSession, admin_user: AdminUser):
+def read_job_by_id(job_id: str, db: DBSession, current_user: CurrentUser):
     """
-    Retrieve a single job detail entry using its admin-provided `job_id`. Requires valid Admin authentication token.
+    Accessible by both Admins and Users.
     """
     return JobService.get_job_by_id(db, job_id)
 
+# --- ADMIN ONLY (Keep AdminUser) ---
 @router.put(
     "/{job_id}",
     response_model=JobRead,
-    summary="Update an existing job detail entry by job_id (Admin required)"
+    summary="Update an existing job detail entry (Admin required)"
 )
 def update_job_details(job_id: str, job_update: JobCreate, db: DBSession, admin_user: AdminUser):
-    """
-    Update the details of an existing job entry. Requires valid Admin authentication token.
-    """
     return JobService.update_job(db, job_id, job_update)
 
 @router.delete(
     "/{job_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a job detail entry by job_id (Admin required)"
+    summary="Delete a job detail entry (Admin required)"
 )
 def delete_job_details(job_id: str, db: DBSession, admin_user: AdminUser):
-    """
-    Delete a job detail entry using its admin-provided `job_id`. Returns 204 No Content on success. Requires valid Admin authentication token.
-    """
     JobService.delete_job(db, job_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
