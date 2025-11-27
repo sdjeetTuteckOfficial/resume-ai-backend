@@ -96,3 +96,20 @@ CREATE TABLE t_job_details (
     -- Timestamp for when the record was last updated
     updated_at TIMESTAMP WITH TIME ZONE
 );
+
+CREATE TABLE IF NOT EXISTS t_user_details (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL, -- using VARCHAR for phone to preserve leading zeros/formatting
+    gender VARCHAR(20) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state_province VARCHAR(100) NOT NULL,
+    qualification VARCHAR(255) NOT NULL,
+    skills TEXT NOT NULL,       -- TEXT type for potentially long lists of skills
+    cv_file_url VARCHAR(512),   -- Stores the filename or S3/Cloud storage URL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Optional: Create an index on phone or email if you plan to search by them frequently
+CREATE INDEX idx_user_details_phone ON t_user_details(phone);
