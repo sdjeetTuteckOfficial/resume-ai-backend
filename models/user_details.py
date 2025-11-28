@@ -1,15 +1,11 @@
-#user_detals.py
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import relationship, backref
 from database import Base
 
 class UserDetails(Base):
-    # Updated table name as requested
     __tablename__ = "t_user_details"
 
     id = Column(Integer, primary_key=True, index=True)
-    # Foreign key linking to the existing User model (assuming users table is still "users")
-    # unique=True enforces 1-to-1 at the Database level
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False, index=True)
     
     first_name = Column(String(100), nullable=False)
@@ -19,9 +15,11 @@ class UserDetails(Base):
     city = Column(String(100), nullable=True)
     state_province = Column(String(100), nullable=True)
     qualification = Column(String(200), nullable=True)
-    skills = Column(Text, nullable=True)  # Store as comma-separated text or JSON string
-    cv_file_url = Column(String(500), nullable=True) # Path to the uploaded resume
+    skills = Column(Text, nullable=True)
+    
+    # CHANGED: Store file binary data and metadata
+    cv_filename = Column(String(255), nullable=True)
+    cv_content_type = Column(String(100), nullable=True)
+    cv_file_data = Column(LargeBinary, nullable=True) 
 
-    # Relationship back to the User model
-    # uselist=False ensures accessing user.details returns a single object, not a list
     user = relationship("User", backref=backref("details", uselist=False))

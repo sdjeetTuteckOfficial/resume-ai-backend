@@ -5,7 +5,7 @@ from database import engine, Base
 from routers import auth
 from routers.job_router import router as job_router
 from routers.user_details_entry import router as user_details_entry_router
-
+from routers.interview_routes import router as interview_details_router
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
@@ -24,7 +24,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(job_router, prefix="/api/jobs", tags=["Jobs"])
 app.include_router(user_details_entry_router, prefix="/api/user_details", tags=["User Details"])
-
+app.include_router(interview_details_router, prefix="/api/gap", tags=["Gap analysis"])
 @app.get("/")
 def read_root():
     return {"message": "FastAPI Auth System API"}

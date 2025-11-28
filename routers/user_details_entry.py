@@ -1,9 +1,10 @@
-#user_details_entry.py
-from fastapi import APIRouter, status, Response, Depends
-from typing import List
-from schemas.user_details_schema import UserDetailsCreate, UserDetailsRead, UserDetailsUpdate
+from fastapi import APIRouter, status, Response, Depends, Form, UploadFile, File, HTTPException
+from typing import List, Optional
+from schemas.user_details_schema import UserDetailsRead
 from services.user_details_service import UserDetailsService
 from utils.dependencies import AdminUser, DBSession, CurrentUser
+from fastapi.responses import StreamingResponse
+import io
 
 router = APIRouter()
 
@@ -15,71 +16,97 @@ router = APIRouter()
     "/user_entry",
     response_model=UserDetailsRead,
     status_code=status.HTTP_201_CREATED,
-    summary="Create user entry for the current user"
+    summary="Create user entry (Multipart Form)"
 )
-def create_my_details(details: UserDetailsCreate, db: DBSession, current_user: CurrentUser):
+async def create_my_details(
+    db: DBSession, 
+    current_user: CurrentUser,
+    # Form fields must be defined explicitly for Multipart
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    gender: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    state_province: Optional[str] = Form(None),
+    qualification: Optional[str] = Form(None),
+    skills: Optional[str] = Form(None),
+    cv_file: Optional[UploadFile] = File(None) # Optional file upload
+):
     """
-    Create a profile entry for the logged-in user. Fails if one already exists.
+    Create a profile entry. Accepts Multipart/Form-Data.
     """
-    return UserDetailsService.create_details(db, details, user_id=current_user.id)
-
-@router.get(
-    "/user_entry",
-    response_model=UserDetailsRead,
-    summary="Get current user's entry details"
-)
-def read_my_details(db: DBSession, current_user: CurrentUser):
-    """
-    Get the profile entry of the logged-in user.
-    """
-    return UserDetailsService.get_my_details(db, user_id=current_user.id)
+    # Pack data into a dictionary
+    data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "gender": gender,
+        "phone": phone,
+        "city": city,
+        "state_province": state_province,
+        "qualification": qualification,
+        "skills": skills
+    }
+    
+    return await UserDetailsService.create_details(
+        db, 
+        data=data, 
+        cv_file=cv_file, 
+        user_id=current_user.id
+    )
 
 @router.put(
     "/user_entry",
     response_model=UserDetailsRead,
-    summary="Update current user's entry details"
+    summary="Update current user's entry (Multipart Form)"
 )
-def update_my_details(details_update: UserDetailsUpdate, db: DBSession, current_user: CurrentUser):
+async def update_my_details(
+    db: DBSession, 
+    current_user: CurrentUser,
+    # All fields optional for Update
+    first_name: Optional[str] = Form(None),
+    last_name: Optional[str] = Form(None),
+    gender: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    state_province: Optional[str] = Form(None),
+    qualification: Optional[str] = Form(None),
+    skills: Optional[str] = Form(None),
+    cv_file: Optional[UploadFile] = File(None)
+):
     """
-    Update specific fields for the logged-in user's entry.
+    Update profile entry. Accepts Multipart/Form-Data.
     """
-    return UserDetailsService.update_my_details(db, user_id=current_user.id, details_update=details_update)
+    data = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "gender": gender,
+        "phone": phone,
+        "city": city,
+        "state_province": state_province,
+        "qualification": qualification,
+        "skills": skills
+    }
+    
+    # Remove None values so we don't overwrite existing data with nulls
+    data = {k: v for k, v in data.items() if v is not None}
 
-
-# ==========================================
-#  ADMIN MANAGEMENT
-# ==========================================
+    return await UserDetailsService.update_my_details(
+        db, 
+        user_id=current_user.id, 
+        update_data=data, 
+        cv_file=cv_file
+    )
 
 @router.get(
-    "/",
-    response_model=List[UserDetailsRead],
-    summary="List all user details (Admin only)"
+    "/user_entry/cv",
+    summary="Download the CV/Resume"
 )
-def read_all_details(db: DBSession, admin_user: AdminUser, skip: int = 0, limit: int = 100):
+def download_my_cv(db: DBSession, current_user: CurrentUser):
     """
-    Admin: View all user details in the system.
+    Downloads the binary file stored in the database.
     """
-    return UserDetailsService.get_all_details(db, skip=skip, limit=limit)
+    return UserDetailsService.get_cv_file(db, user_id=current_user.id)
 
-@router.get(
-    "/{details_id}",
-    response_model=UserDetailsRead,
-    summary="Get specific details by ID (Admin only)"
-)
-def read_details_by_id(details_id: int, db: DBSession, admin_user: AdminUser):
-    """
-    Admin: View specific details by the Details ID (not User ID).
-    """
-    return UserDetailsService.get_details_by_id(db, details_id)
-
-@router.delete(
-    "/{details_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a user details entry (Admin only)"
-)
-def delete_user_details(details_id: int, db: DBSession, admin_user: AdminUser):
-    """
-    Admin: Delete a user details entry.
-    """
-    UserDetailsService.delete_details(db, details_id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+@router.get("/user_entry", response_model=UserDetailsRead)
+def read_my_details(db: DBSession, current_user: CurrentUser):
+    return UserDetailsService.get_my_details(db, user_id=current_user.id)
