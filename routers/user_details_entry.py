@@ -1,3 +1,4 @@
+#user_details_entry.py
 from fastapi import APIRouter, status, Response, Depends
 from typing import List
 from schemas.user_details_schema import UserDetailsCreate, UserDetailsRead, UserDetailsUpdate
