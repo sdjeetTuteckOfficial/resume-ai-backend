@@ -43,22 +43,7 @@ class GapAnalysisService:
         """
         
         # ---------------------------------------------------------
-        # STEP 1: Fetch Hardcoded Job Description from DB
-        # ---------------------------------------------------------
-        TARGET_JOB_ID = "JOB26783"
-        
-        job_record = db.query(TJobDetails).filter(TJobDetails.job_id == TARGET_JOB_ID).first()
-        
-        if not job_record:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Configuration Error: Target Job ({TARGET_JOB_ID}) not found in system."
-            )
-            
-        job_description_text = job_record.job_details
-
-        # ---------------------------------------------------------
-        # STEP 2: Get the Blob from 't_user_details' using Token ID
+        # STEP 1: Get User Details (To find the Job ID & CV)
         # ---------------------------------------------------------
         user_details = db.query(UserDetails).filter(UserDetails.user_id == user_id).first()
         
@@ -68,6 +53,12 @@ class GapAnalysisService:
                 detail="User profile not found."
             )
 
+        if not user_details.job_id:
+             raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="No Job selected. Please update your profile with a valid Job ID."
+            )
+
         if not user_details.cv_file_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
@@ -75,9 +66,33 @@ class GapAnalysisService:
             )
 
         # ---------------------------------------------------------
+        # STEP 2: Fetch Job Description using user_details.job_id
+        # ---------------------------------------------------------
+        # Using TJobDetails.id (Integer Primary Key)
+        job_record = db.query(TJobDetails).filter(TJobDetails.id == user_details.job_id).first()
+        
+        if not job_record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Configuration Error: The Job (ID: {user_details.job_id}) associated with this user was not found."
+            )
+            
+        job_description_text = job_record.job_details
+        
+        # --- DEBUG PRINT ---
+        print("\n========== JOB DESCRIPTION ==========")
+        print(job_description_text)
+        print("=====================================\n")
+
+        # ---------------------------------------------------------
         # STEP 3: Extract Text from the Blob
         # ---------------------------------------------------------
         cv_text = GapAnalysisService._extract_text_from_blob(user_details.cv_file_data)
+        
+        # --- DEBUG PRINT ---
+        print("\n========== CV TEXT ==========")
+        print(cv_text)
+        print("=============================\n")
 
         if len(cv_text.strip()) < 50:
             raise HTTPException(
