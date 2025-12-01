@@ -3,6 +3,9 @@ from typing import Optional
 
 # Base properties (Excluding file info)
 class UserDetailsBase(BaseModel):
+    # NEW: Added job_id
+    job_id: Optional[int] = None 
+    
     first_name: str
     last_name: str
     gender: Optional[str] = None
@@ -17,8 +20,6 @@ class UserDetailsRead(UserDetailsBase):
     id: int
     user_id: int
     cv_filename: Optional[str] = None
-    # We create a computed field or just send the filename to indicate existence
-    # Do not send the LargeBinary data here, it will crash the JSON response.
-
+    
     class Config:
         from_attributes = True
