@@ -97,26 +97,13 @@ CREATE TABLE t_job_details (
     updated_at TIMESTAMP WITH TIME ZONE
 );
 
--- CREATE TABLE IF NOT EXISTS t_user_details (
---     id SERIAL PRIMARY KEY,
---     first_name VARCHAR(100) NOT NULL,
---     last_name VARCHAR(100) NOT NULL,
---     phone VARCHAR(20) NOT NULL, -- using VARCHAR for phone to preserve leading zeros/formatting
---     gender VARCHAR(20) NOT NULL,
---     city VARCHAR(100) NOT NULL,
---     state_province VARCHAR(100) NOT NULL,
---     qualification VARCHAR(255) NOT NULL,
---     skills TEXT NOT NULL,       -- TEXT type for potentially long lists of skills
---     cv_file_url VARCHAR(512),   -- Stores the filename or S3/Cloud storage URL
---     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
--- );
-
--- -- Optional: Create an index on phone or email if you plan to search by them frequently
--- CREATE INDEX idx_user_details_phone ON t_user_details(phone);
-
-CREATE TABLE IF NOT EXISTS t_user_details (
+CREATE TABLE t_user_details (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    
+    -- CHANGED: Use INTEGER to match standard "id SERIAL" in t_job_details
+    job_id INTEGER, 
+    
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     gender VARCHAR(20),
@@ -129,10 +116,44 @@ CREATE TABLE IF NOT EXISTS t_user_details (
     -- File Storage Columns
     cv_filename VARCHAR(255),
     cv_content_type VARCHAR(100),
-    cv_file_data BYTEA, -- This stores the Blob
+    cv_file_data BYTEA, 
     
-    -- Constraints
-    CONSTRAINT fk_user_details_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    -- Constraint: Link to the Auth User
+    CONSTRAINT fk_user_details_users 
+        FOREIGN KEY (user_id) 
+        REFERENCES users(id) 
+        ON DELETE CASCADE,
+        
+    -- Constraint: Link to the Job Table
+    -- Ensure t_job_details is created BEFORE running this script
+    CONSTRAINT fk_user_details_job_id 
+        FOREIGN KEY (job_id) 
+        REFERENCES t_job_details(id) 
+        ON DELETE SET NULL,
+        
+    -- Constraint: Ensure one profile per user
     CONSTRAINT uq_user_details_user_id UNIQUE (user_id)
 );
+
+-- CREATE TABLE IF NOT EXISTS t_user_details (
+--     id SERIAL PRIMARY KEY,
+--     user_id INTEGER NOT NULL,
+--     first_name VARCHAR(100) NOT NULL,
+--     last_name VARCHAR(100) NOT NULL,
+--     gender VARCHAR(20),
+--     phone VARCHAR(20),
+--     city VARCHAR(100),
+--     state_province VARCHAR(100),
+--     qualification VARCHAR(200),
+--     skills TEXT,
+    
+--     -- File Storage Columns
+--     cv_filename VARCHAR(255),
+--     cv_content_type VARCHAR(100),
+--     cv_file_data BYTEA, -- This stores the Blob
+    
+--     -- Constraints
+--     CONSTRAINT fk_user_details_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+--     CONSTRAINT uq_user_details_user_id UNIQUE (user_id)
+-- );
 

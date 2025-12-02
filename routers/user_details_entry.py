@@ -21,7 +21,10 @@ router = APIRouter()
 async def create_my_details(
     db: DBSession, 
     current_user: CurrentUser,
-    # Form fields must be defined explicitly for Multipart
+    # Form fields
+    # NEW: Accept job_id from the form
+    job_id: Optional[str] = Form(None), 
+    
     first_name: str = Form(...),
     last_name: str = Form(...),
     gender: Optional[str] = Form(None),
@@ -30,13 +33,14 @@ async def create_my_details(
     state_province: Optional[str] = Form(None),
     qualification: Optional[str] = Form(None),
     skills: Optional[str] = Form(None),
-    cv_file: Optional[UploadFile] = File(None) # Optional file upload
+    cv_file: Optional[UploadFile] = File(None) 
 ):
     """
     Create a profile entry. Accepts Multipart/Form-Data.
     """
     # Pack data into a dictionary
     data = {
+        "job_id": job_id, # Added here
         "first_name": first_name,
         "last_name": last_name,
         "gender": gender,
@@ -63,6 +67,9 @@ async def update_my_details(
     db: DBSession, 
     current_user: CurrentUser,
     # All fields optional for Update
+    # NEW: Accept job_id for update
+    job_id: Optional[str] = Form(None),
+    
     first_name: Optional[str] = Form(None),
     last_name: Optional[str] = Form(None),
     gender: Optional[str] = Form(None),
@@ -77,6 +84,7 @@ async def update_my_details(
     Update profile entry. Accepts Multipart/Form-Data.
     """
     data = {
+        "job_id": job_id, # Added here
         "first_name": first_name,
         "last_name": last_name,
         "gender": gender,
@@ -97,14 +105,12 @@ async def update_my_details(
         cv_file=cv_file
     )
 
+# ... (Download and Read endpoints remain unchanged) ...
 @router.get(
     "/user_entry/cv",
     summary="Download the CV/Resume"
 )
 def download_my_cv(db: DBSession, current_user: CurrentUser):
-    """
-    Downloads the binary file stored in the database.
-    """
     return UserDetailsService.get_cv_file(db, user_id=current_user.id)
 
 @router.get("/user_entry", response_model=UserDetailsRead)
