@@ -135,25 +135,4 @@ CREATE TABLE t_user_details (
     CONSTRAINT uq_user_details_user_id UNIQUE (user_id)
 );
 
--- CREATE TABLE IF NOT EXISTS t_user_details (
---     id SERIAL PRIMARY KEY,
---     user_id INTEGER NOT NULL,
---     first_name VARCHAR(100) NOT NULL,
---     last_name VARCHAR(100) NOT NULL,
---     gender VARCHAR(20),
---     phone VARCHAR(20),
---     city VARCHAR(100),
---     state_province VARCHAR(100),
---     qualification VARCHAR(200),
---     skills TEXT,
-    
---     -- File Storage Columns
---     cv_filename VARCHAR(255),
---     cv_content_type VARCHAR(100),
---     cv_file_data BYTEA, -- This stores the Blob
-    
---     -- Constraints
---     CONSTRAINT fk_user_details_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
---     CONSTRAINT uq_user_details_user_id UNIQUE (user_id)
--- );
 
